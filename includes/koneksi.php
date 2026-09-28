@@ -3,7 +3,7 @@
 // kalau tidak fallback ke setting lokal (Laragon/dev).
 $host = getenv('DB_HOST') ?: "localhost";
 $port = getenv('DB_PORT') ?: "5432";
-$db   = getenv('DB_NAME') ?: "game_database";
+$db   = getenv('DB_NAME') ?: "public";
 $user = getenv('DB_USER') ?: "postgres";
 $pass = getenv('DB_PASS') ?: "postgres";
 
