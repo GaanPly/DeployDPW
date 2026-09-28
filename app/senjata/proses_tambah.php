@@ -1,5 +1,5 @@
 <?php
-session_start();
+require __DIR__ . '/../includes/helpers.php';
 require __DIR__ . '/../includes/koneksi.php';
 
 $nama = trim($_POST['nama'] ?? '');
@@ -24,7 +24,7 @@ if (!is_numeric($durabilitas) || $durabilitas < 0) {
 }
 
 if (!empty($errors)) {
-    $_SESSION['flash'] = ['type' => 'error', 'pesan' => implode(' ', $errors)];
+    set_flash('error', implode(' ', $errors));
     header('Location: tambah.php');
     exit;
 }
@@ -41,6 +41,6 @@ $stmt->execute([
     'durabilitas' => (int) $durabilitas,
 ]);
 
-$_SESSION['flash'] = ['type' => 'success', 'pesan' => 'Senjata berhasil ditambahkan.'];
+set_flash('success', 'Senjata berhasil ditambahkan.');
 header('Location: list.php');
 exit;

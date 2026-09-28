@@ -17,11 +17,11 @@ $totalKarakter = $pdo->query("SELECT COUNT(*) FROM karakter")->fetchColumn();
         <section class="summary">
             <article>
                 <h3>Total Senjata</h3>
-                <p><?php echo $totalSenjata; ?></p>
+                <p><?php echo e($totalSenjata); ?></p>
             </article>
             <article>
                 <h3>Total Karakter</h3>
-                <p><?php echo $totalKarakter; ?></p>
+                <p><?php echo e($totalKarakter); ?></p>
             </article>
         </section>
 <?php include __DIR__ . '/includes/footer.php'; ?>

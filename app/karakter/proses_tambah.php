@@ -1,5 +1,5 @@
 <?php
-session_start();
+require __DIR__ . '/../includes/helpers.php';
 require __DIR__ . '/../includes/koneksi.php';
 
 $nama = trim($_POST['nama'] ?? '');
@@ -18,7 +18,7 @@ if ($perlindungan === '') {
 }
 
 if (!empty($errors)) {
-    $_SESSION['flash'] = ['type' => 'error', 'pesan' => implode(' ', $errors)];
+    set_flash('error', implode(' ', $errors));
     header('Location: tambah.php');
     exit;
 }
@@ -34,6 +34,6 @@ $stmt->execute([
     'perlindungan' => $perlindungan,
 ]);
 
-$_SESSION['flash'] = ['type' => 'success', 'pesan' => 'Karakter berhasil ditambahkan.'];
+set_flash('success', 'Karakter berhasil ditambahkan.');
 header('Location: list.php');
 exit;

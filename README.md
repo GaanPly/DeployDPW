@@ -1,36 +1,46 @@
-# Jobsheet 8 — Koneksi PostgreSQL
+# Jobsheet 8 — Koneksi PostgreSQL (siap deploy ke Vercel)
 
-Sub-CPMK: Menghubungkan aplikasi dengan basis data PostgreSQL.
+Aplikasi PHP + PostgreSQL untuk mengelola data **senjata** dan **karakter**.
 
-## Perubahan dari Jobsheet 7
-- Tambah `sql/01_buku_anggota.sql` — DDL tabel `buku` dan `anggota` (ERD dasar).
-- Tambah `includes/koneksi.php` — koneksi `PDO` driver `pgsql`.
-- `buku/proses_tambah.php` & `anggota/proses_tambah.php`: `$_SESSION['buku'][] = ...` (Jobsheet 7) diganti `INSERT ... RETURNING id` via prepared statement.
-- `buku/list.php` & `anggota/list.php`: sumber data diganti dari `$_SESSION` menjadi `SELECT * FROM ... ORDER BY id DESC`.
-- `index.php`: kartu statistik Total Buku/Anggota kini `SELECT COUNT(*)` dari database (bukan dummy/session lagi).
-
-## Persiapan database
-1. Pastikan PostgreSQL berjalan dan ekstensi PHP `pdo_pgsql` aktif (`php -m | grep pgsql`; bila belum ada, aktifkan `extension=pdo_pgsql` di `php.ini` lalu restart server).
-2. Buat database:
-   ```bash
-   createdb simpus_mini
-   ```
-3. Jalankan skema:
-   ```bash
-   psql -d simpus_mini -f sql/01_buku_anggota.sql
-   ```
-4. Sesuaikan kredensial di `includes/koneksi.php` (`$user`, `$pass`) dengan environment lokal.
-
-## Cara menjalankan
-**Opsi 1 — PHP built-in server**:
-```bash
-php -S localhost:8000
+## Struktur
 ```
-Buka `http://localhost:8000/index.php`.
+api/index.php      Front controller (satu-satunya fungsi serverless Vercel)
+app/               Halaman PHP (index, senjata/, karakter/, includes/)
+public/assets/     CSS & JS (dilayani statis oleh Vercel)
+sql/               Skema database
+vercel.json        Konfigurasi runtime PHP (vercel-php)
+```
 
-**Opsi 2 — Laragon (Apache)**: lewat virtual host langsung ke folder `jobsheet-08/` (mis. `http://jobsheet08.test/`), atau bersarang di bawah domain proyek (mis. `http://dp2026.test/kode-praktikum/jobsheet-08/`) — path CSS/JS/link sudah relatif otomatis (lihat `includes/header.php`), jadi keduanya jalan.
+## Deploy ke Vercel
+Vercel tidak punya PHP bawaan, jadi dipakai runtime komunitas `vercel-php`. Vercel juga tidak
+menyediakan PostgreSQL lokal, jadi butuh database cloud (Neon, Supabase, dsb).
+
+1. Buat database PostgreSQL gratis (mis. di neon.tech atau supabase.com), lalu salin connection string-nya.
+2. Buka SQL Editor database tersebut dan jalankan isi `sql/database_kartu.sql`.
+3. Push folder ini ke GitHub, lalu **Import Project** di Vercel (Framework Preset: *Other*, build command dikosongkan).
+4. Di **Settings > Environment Variables** tambahkan:
+   `DATABASE_URL = postgresql://USER:PASSWORD@HOST:5432/DBNAME?sslmode=require`
+5. Deploy. Atau lewat CLI: `npm i -g vercel && vercel --prod`.
+
+## Jalankan lokal
+1. Pastikan PostgreSQL berjalan dan ekstensi `pdo_pgsql` aktif.
+2. `createdb game_database` lalu `psql -d game_database -f sql/database_kartu.sql`
+3. Jalankan:
+   ```bash
+   php -S localhost:8000 -t public api/index.php
+   ```
+   Tanpa `DATABASE_URL`, dipakai default `postgres:postgres@localhost:5432/game_database`
+   (ubah di `app/includes/koneksi.php` bila perlu), atau set `DATABASE_URL` seperti di atas.
+
+## Perubahan agar cocok untuk Vercel
+- Aset dipindah ke `public/assets/`, halaman ke `app/`, dan semua request dirutekan lewat `api/index.php`
+  (URL tetap sama: `/senjata/list.php`, atau tanpa `.php`).
+- `koneksi.php` membaca `DATABASE_URL` (SSL otomatis untuk host non-lokal); pesan error tidak lagi membocorkan detail koneksi.
+- Flash message pindah dari `$_SESSION` ke cookie singkat (`app/includes/helpers.php`), karena session file tidak
+  bertahan antar-instance serverless.
+- Output dibungkus `e()` (`htmlspecialchars`) agar input tidak bisa menyisipkan HTML/JS.
+- Path CSS/JS kini absolut dari root domain (`/assets/...`).
 
 ## Catatan
-- Data yang diinput sekarang **persisten** — coba tutup-buka browser, data tetap ada (beda dengan Jobsheet 7 yang hilang saat sesi berakhir).
-- Query memakai prepared statement (`:nama_parameter`) — bukan concatenation string — sebagai fondasi keamanan yang diperdalam di Jobsheet 11.
-- Kolom `id` sudah ikut ter-fetch dari `SELECT *` meski belum dipakai di tampilan — akan digunakan untuk link Edit/Hapus mulai Jobsheet 9.
+- Query memakai prepared statement (`:nama_parameter`).
+- Pilih region database yang dekat dengan region fungsi Vercel agar tidak lambat.

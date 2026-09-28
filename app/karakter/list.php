@@ -1,10 +1,9 @@
 <?php
 $page_title = "Daftar Karakter";
-include __DIR__ . '/../includes/header.php';
+require __DIR__ . '/../includes/helpers.php';
 require __DIR__ . '/../includes/koneksi.php';
-
-$flash = $_SESSION['flash'] ?? null;
-unset($_SESSION['flash']);
+$flash = ambil_flash();
+include __DIR__ . '/../includes/header.php';
 
 $daftarKarakter = $pdo->query("SELECT * FROM karakter ORDER BY id DESC")->fetchAll(PDO::FETCH_ASSOC);
 ?>
@@ -12,7 +11,7 @@ $daftarKarakter = $pdo->query("SELECT * FROM karakter ORDER BY id DESC")->fetchA
             <h2>Daftar Karakter</h2>
 
             <?php if ($flash): ?>
-                <p class="flash flash-<?php echo $flash['type']; ?>"><?php echo $flash['pesan']; ?></p>
+                <p class="flash flash-<?php echo e($flash['type']); ?>"><?php echo e($flash['pesan']); ?></p>
             <?php endif; ?>
 
             <div class="search-box">
@@ -39,10 +38,10 @@ $daftarKarakter = $pdo->query("SELECT * FROM karakter ORDER BY id DESC")->fetchA
                     <?php else: ?>
                         <?php foreach ($daftarKarakter as $karakter): ?>
                         <tr>
-                            <td><?php echo $karakter['id']; ?></td>
-                            <td><?php echo $karakter['nama']; ?></td>
-                            <td><?php echo $karakter['nyawa']; ?></td>
-                            <td><?php echo $karakter['perlindungan']; ?></td>
+                            <td><?php echo e($karakter['id']); ?></td>
+                            <td><?php echo e($karakter['nama']); ?></td>
+                            <td><?php echo e($karakter['nyawa']); ?></td>
+                            <td><?php echo e($karakter['perlindungan']); ?></td>
                             <td>
                                 <button type="button">Edit</button>
                                 <button type="button" class="btn-hapus">Hapus</button>
